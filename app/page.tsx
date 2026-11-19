@@ -69,6 +69,7 @@ export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [cart, setCart] = useState<CartEntry[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
+  const [pressedProductId, setPressedProductId] = useState<number | null>(null);
 
   const filteredProducts = useMemo(() => {
     return PRODUCTS.filter((item) => {
@@ -109,6 +110,15 @@ export default function HomePage() {
     setCartOpen(true);
   };
 
+  const handleProductCardTap = (item: ProductItem) => {
+    setPressedProductId(item.id);
+    addToCart(item, 1);
+    window.setTimeout(() => {
+      setCartOpen(true);
+      setPressedProductId(null);
+    }, 320);
+  };
+
   const updateQty = (productId: number, delta: number) => {
     setCart((prev) =>
       prev
@@ -131,14 +141,14 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white text-[#14171F] scroll-smooth">
-      {/* Barra superior */}
+      {/* Barra superior visible en computadora y celular */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-[#E4E4E7]">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-6">
+        <div className="max-w-7xl mx-auto px-4 min-h-16 py-2 md:py-0 flex flex-wrap items-center justify-between gap-2 md:gap-4">
+          <div className="flex items-center gap-4 md:gap-6">
             <button
               type="button"
               onClick={() => scrollToSection('inicio')}
-              className="text-xl font-extrabold tracking-tight text-[#14171F] cursor-pointer"
+              className="text-lg sm:text-xl font-extrabold tracking-tight text-[#14171F] cursor-pointer"
             >
               MEZQUITE.
             </button>
@@ -186,6 +196,30 @@ export default function HomePage() {
               </span>
             </button>
           </div>
+
+          {/* Barra de navegación visible en celular */}
+          <nav className="w-full md:hidden flex items-center justify-center gap-6 pt-1.5 pb-1 border-t border-[#F4F4F5] text-xs font-bold text-[#52525B]">
+            <button
+              type="button"
+              onClick={() => scrollToSection('inicio')}
+              className="hover:text-[#14171F] active:text-[#14171F] transition cursor-pointer"
+            >
+              Inicio
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollToSection('productos')}
+              className="hover:text-[#14171F] active:text-[#14171F] transition cursor-pointer"
+            >
+              Productos
+            </button>
+            <Link
+              href="/beneficios"
+              className="hover:text-[#14171F] active:text-[#14171F] transition"
+            >
+              Beneficios
+            </Link>
+          </nav>
         </div>
       </header>
 
@@ -194,7 +228,7 @@ export default function HomePage() {
         <OrbitalHero onAddProduct={handleAddFromHero} />
 
         {/* Catálogo de productos */}
-        <section id="productos" className="max-w-7xl mx-auto px-4 py-12 scroll-mt-20">
+        <section id="productos" className="max-w-7xl mx-auto px-4 py-12 scroll-mt-24">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
             <div>
               <span className="block text-[11px] font-light uppercase tracking-[0.28em] text-[#52525B] mb-1">
@@ -235,66 +269,124 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProducts.map((item) => (
-              <div
-                key={item.id}
-                onClick={() => {
-                  addToCart(item, 1);
-                  setCartOpen(true);
-                }}
-                style={
-                  {
-                    '--card-accent': item.accentColor,
-                  } as React.CSSProperties
-                }
-                className="group relative rounded-[28px] border border-[#E4E4E7] bg-white p-7 flex flex-col justify-between transition-all duration-300 ease-out cursor-pointer hover:border-transparent hover:-translate-y-1.5 hover:shadow-[0_22px_45px_rgba(0,0,0,0.22)] hover:[background-color:var(--card-accent)]"
-              >
-                <div>
-                  <div className="flex items-center justify-between text-xs font-extrabold uppercase tracking-widest text-[#52525B] group-hover:text-white/90 transition-colors duration-300 mb-6">
-                    <span>{item.weight}</span>
+            {filteredProducts.map((item) => {
+              const isPressed = pressedProductId === item.id;
+              return (
+                <div
+                  key={item.id}
+                  onTouchStart={() => setPressedProductId(item.id)}
+                  onClick={() => handleProductCardTap(item)}
+                  style={
+                    {
+                      '--card-accent': item.accentColor,
+                      backgroundColor: isPressed ? item.accentColor : undefined,
+                    } as React.CSSProperties
+                  }
+                  className={`group relative rounded-[28px] border border-[#E4E4E7] bg-white p-7 flex flex-col justify-between transition-all duration-300 ease-out cursor-pointer select-none hover:border-transparent hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[0_22px_45px_rgba(0,0,0,0.22)] hover:[background-color:var(--card-accent)] active:border-transparent active:-translate-y-1.5 active:scale-[1.02] active:shadow-[0_22px_45px_rgba(0,0,0,0.22)] active:[background-color:var(--card-accent)] ${
+                    isPressed
+                      ? 'border-transparent -translate-y-1.5 scale-[1.02] shadow-[0_22px_45px_rgba(0,0,0,0.22)]'
+                      : ''
+                  }`}
+                >
+                  <div>
+                    <div
+                      className={`flex items-center justify-between text-xs font-extrabold uppercase tracking-widest transition-colors duration-300 mb-6 ${
+                        isPressed
+                          ? 'text-white/90'
+                          : 'text-[#52525B] group-hover:text-white/90 group-active:text-white/90'
+                      }`}
+                    >
+                      <span>{item.weight}</span>
+                      <span
+                        style={{ backgroundColor: isPressed ? '#FFFFFF' : item.accentColor }}
+                        className="w-3 h-3 rounded-full ring-2 ring-white/40 group-hover:bg-white group-active:bg-white transition-colors duration-300"
+                      />
+                    </div>
+
+                    <div className="h-52 flex items-center justify-center mb-6 px-2">
+                      <img
+                        src={item.imageUrl}
+                        alt={item.name}
+                        className={`max-h-full w-auto object-contain transition-transform duration-300 ease-out ${
+                          isPressed
+                            ? 'scale-105'
+                            : 'group-hover:scale-105 group-active:scale-105'
+                        }`}
+                      />
+                    </div>
+
+                    <h3
+                      className={`text-xl font-extrabold transition-colors duration-300 ${
+                        isPressed
+                          ? 'text-white'
+                          : 'text-[#14171F] group-hover:text-white group-active:text-white'
+                      }`}
+                    >
+                      {item.name}
+                    </h3>
+                    <p
+                      className={`text-xs font-bold uppercase tracking-wider transition-colors duration-300 mt-1 ${
+                        isPressed
+                          ? 'text-white/85'
+                          : 'text-[#881337] group-hover:text-white/85 group-active:text-white/85'
+                      }`}
+                    >
+                      {item.tagline}
+                    </p>
+                    <p
+                      className={`text-sm transition-colors duration-300 mt-2 leading-relaxed ${
+                        isPressed
+                          ? 'text-white/90'
+                          : 'text-[#52525B] group-hover:text-white/90 group-active:text-white/90'
+                      }`}
+                    >
+                      {item.description}
+                    </p>
+                  </div>
+
+                  <div
+                    className={`mt-6 pt-4 border-t transition-colors duration-300 flex items-center justify-between ${
+                      isPressed
+                        ? 'border-white/20'
+                        : 'border-[#F4F4F5] group-hover:border-white/20 group-active:border-white/20'
+                    }`}
+                  >
                     <span
-                      style={{ backgroundColor: item.accentColor }}
-                      className="w-3 h-3 rounded-full ring-2 ring-white/40 group-hover:bg-white transition-colors duration-300"
-                    />
-                  </div>
-
-                  <div className="h-52 flex items-center justify-center mb-6 px-2">
-                    <img
-                      src={item.imageUrl}
-                      alt={item.name}
-                      className="max-h-full w-auto object-contain transition-transform duration-300 ease-out group-hover:scale-105"
-                    />
-                  </div>
-
-                  <h3 className="text-xl font-extrabold text-[#14171F] group-hover:text-white transition-colors duration-300">
-                    {item.name}
-                  </h3>
-                  <p className="text-xs font-bold uppercase tracking-wider text-[#881337] group-hover:text-white/85 transition-colors duration-300 mt-1">
-                    {item.tagline}
-                  </p>
-                  <p className="text-sm text-[#52525B] group-hover:text-white/90 transition-colors duration-300 mt-2 leading-relaxed">
-                    {item.description}
-                  </p>
-                </div>
-
-                <div className="mt-6 pt-4 border-t border-[#F4F4F5] group-hover:border-white/20 transition-colors duration-300 flex items-center justify-between">
-                  <span className="text-xl font-extrabold text-[#14171F] group-hover:text-white transition-colors duration-300">
-                    ${item.price}{' '}
-                    <span className="text-xs font-semibold text-[#71717A] group-hover:text-white/80 transition-colors duration-300">
-                      MXN
+                      className={`text-xl font-extrabold transition-colors duration-300 ${
+                        isPressed
+                          ? 'text-white'
+                          : 'text-[#14171F] group-hover:text-white group-active:text-white'
+                      }`}
+                    >
+                      ${item.price}{' '}
+                      <span
+                        className={`text-xs font-semibold transition-colors duration-300 ${
+                          isPressed
+                            ? 'text-white/80'
+                            : 'text-[#71717A] group-hover:text-white/80 group-active:text-white/80'
+                        }`}
+                      >
+                        MXN
+                      </span>
                     </span>
-                  </span>
-                  <span className="rounded-full bg-[#14171F] group-hover:bg-white group-hover:text-[#14171F] text-white text-xs font-extrabold px-4 py-2 transition-colors duration-300">
-                    + Agregar
-                  </span>
+                    <span
+                      className={`rounded-full text-xs font-extrabold px-4 py-2 transition-colors duration-300 ${
+                        isPressed
+                          ? 'bg-white text-[#14171F]'
+                          : 'bg-[#14171F] text-white group-hover:bg-white group-hover:text-[#14171F] group-active:bg-white group-active:text-[#14171F]'
+                      }`}
+                    >
+                      + Agregar
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
 
         {/* Sección de Beneficios en página */}
-        <section id="beneficios" className="max-w-7xl mx-auto px-4 py-12 border-t border-[#E4E4E7] scroll-mt-20">
+        <section id="beneficios" className="max-w-7xl mx-auto px-4 py-12 border-t border-[#E4E4E7] scroll-mt-24">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="rounded-2xl bg-[#FAFAFA] border border-[#E4E4E7] p-6">
               <h3 className="font-extrabold text-base text-[#14171F]">Elaboración Artesanal</h3>

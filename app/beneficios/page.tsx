@@ -32,16 +32,18 @@ const THREE_CONTAINERS: ThreeContainerItem[] = [
 
 function SingleContainer({
   item,
-  isHovered,
+  isHighlighted,
   onEnter,
   onLeave,
+  onToggle,
 }: {
   item: ThreeContainerItem;
-  isHovered: boolean;
+  isHighlighted: boolean;
   onEnter: () => void;
   onLeave: () => void;
+  onToggle: () => void;
 }) {
-  const fillColor = isHovered ? '#49C5FF' : '#052354';
+  const fillColor = isHighlighted ? '#49C5FF' : '#052354';
 
   if (item.id === 'tall-cup') {
     return (
@@ -49,9 +51,10 @@ function SingleContainer({
         type="button"
         onMouseEnter={onEnter}
         onMouseLeave={onLeave}
+        onClick={onToggle}
         aria-label={item.title}
         className={`relative flex items-center justify-center w-52 sm:w-64 md:w-72 h-[22rem] sm:h-[26rem] md:h-[29rem] transition-all duration-300 ease-out cursor-pointer focus:outline-none ${
-          isHovered ? 'scale-[1.05] -translate-y-2 z-20' : 'scale-100 z-10'
+          isHighlighted ? 'scale-[1.05] -translate-y-2 z-20' : 'scale-100 z-10'
         }`}
       >
         <svg viewBox="0 0 240 380" className="w-full h-full">
@@ -61,7 +64,7 @@ function SingleContainer({
             className="transition-colors duration-300"
           />
         </svg>
-        {isHovered && (
+        {isHighlighted && (
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center text-white px-9 sm:px-11 pt-6">
             <h2 className="w-full max-w-[145px] text-base sm:text-lg font-extrabold leading-tight break-words">
               {item.title}
@@ -81,9 +84,10 @@ function SingleContainer({
         type="button"
         onMouseEnter={onEnter}
         onMouseLeave={onLeave}
+        onClick={onToggle}
         aria-label={item.title}
         className={`relative flex items-center justify-center w-52 sm:w-60 md:w-64 h-[25rem] sm:h-[29rem] md:h-[32rem] transition-all duration-300 ease-out cursor-pointer focus:outline-none ${
-          isHovered ? 'scale-[1.05] -translate-y-2 z-20' : 'scale-100 z-10'
+          isHighlighted ? 'scale-[1.05] -translate-y-2 z-20' : 'scale-100 z-10'
         }`}
       >
         <svg viewBox="0 0 220 440" className="w-full h-full">
@@ -93,7 +97,7 @@ function SingleContainer({
             className="transition-colors duration-300"
           />
         </svg>
-        {isHovered && (
+        {isHighlighted && (
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center text-white px-10 pt-10">
             <h2 className="w-full max-w-[118px] text-sm sm:text-[15px] font-extrabold leading-tight break-words">
               {item.title}
@@ -112,9 +116,10 @@ function SingleContainer({
       type="button"
       onMouseEnter={onEnter}
       onMouseLeave={onLeave}
+      onClick={onToggle}
       aria-label={item.title}
       className={`relative flex items-center justify-center w-52 sm:w-64 md:w-72 h-[15.5rem] sm:h-[18.5rem] md:h-[20.5rem] transition-all duration-300 ease-out cursor-pointer focus:outline-none ${
-        isHovered ? 'scale-[1.05] -translate-y-2 z-20' : 'scale-100 z-10'
+        isHighlighted ? 'scale-[1.05] -translate-y-2 z-20' : 'scale-100 z-10'
       }`}
     >
       <svg viewBox="0 0 250 260" className="w-full h-full">
@@ -124,7 +129,7 @@ function SingleContainer({
           className="transition-colors duration-300"
         />
       </svg>
-      {isHovered && (
+      {isHighlighted && (
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center text-white px-9 sm:px-11 pt-6">
           <h2 className="w-full max-w-[145px] text-sm sm:text-base font-extrabold leading-tight break-words">
             {item.title}
@@ -139,16 +144,15 @@ function SingleContainer({
 }
 
 export default function BeneficiosPage() {
-  const [hoveredId, setHoveredId] = useState<ThreeContainerItem['id'] | null>(null);
+  const [activeId, setActiveId] = useState<ThreeContainerItem['id'] | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
   return (
     <div className="min-h-screen bg-white text-[#052354] flex flex-col justify-between">
-      {/* Encabezado igual al de la primera imagen */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-[#E4E4E7]">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-6">
-            <Link href="/" className="text-xl font-extrabold tracking-tight text-[#14171F]">
+        <div className="max-w-7xl mx-auto px-4 min-h-16 py-2 md:py-0 flex flex-wrap items-center justify-between gap-2 md:gap-4">
+          <div className="flex items-center gap-4 md:gap-6">
+            <Link href="/" className="text-lg sm:text-xl font-extrabold tracking-tight text-[#14171F]">
               MEZQUITE.
             </Link>
             <nav className="hidden md:flex items-center gap-5 text-sm font-semibold text-[#52525B]">
@@ -183,6 +187,18 @@ export default function BeneficiosPage() {
               </span>
             </Link>
           </div>
+
+          <nav className="w-full md:hidden flex items-center justify-center gap-6 pt-1.5 pb-1 border-t border-[#F4F4F5] text-xs font-bold text-[#52525B]">
+            <Link href="/" className="hover:text-[#14171F] transition">
+              Inicio
+            </Link>
+            <Link href="/#productos" className="hover:text-[#14171F] transition">
+              Productos
+            </Link>
+            <Link href="/beneficios" className="text-[#14171F] font-extrabold transition">
+              Beneficios
+            </Link>
+          </nav>
         </div>
       </header>
 
@@ -196,14 +212,15 @@ export default function BeneficiosPage() {
           </h1>
         </div>
 
-        <div className="flex flex-col md:flex-row items-end justify-center gap-6 md:gap-8">
+        <div className="flex flex-col md:flex-row items-center md:items-end justify-center gap-6 md:gap-8">
           {THREE_CONTAINERS.map((item) => (
             <SingleContainer
               key={item.id}
               item={item}
-              isHovered={hoveredId === item.id}
-              onEnter={() => setHoveredId(item.id)}
-              onLeave={() => setHoveredId(null)}
+              isHighlighted={activeId === item.id}
+              onEnter={() => setActiveId(item.id)}
+              onLeave={() => setActiveId(null)}
+              onToggle={() => setActiveId((prev) => (prev === item.id ? null : item.id))}
             />
           ))}
         </div>
